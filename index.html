@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batalha Naval</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <header class="game-header">
+            <h1>🚢 Batalha Naval 🚢</h1>
+            <div class="game-info">
+                <div class="score">
+                    <span>Seus Navios: <span id="player-ships">5</span></span>
+                    <span>Navios IA: <span id="computer-ships">5</span></span>
+                </div>
+                <div class="turn-indicator">
+                    <span id="current-turn">Sua vez</span>
+                </div>
+                <div class="audio-controls">
+                    <button id="music-toggle" class="audio-btn" title="Música de fundo">🎵</button>
+                    <button id="sfx-toggle" class="audio-btn" title="Efeitos sonoros">🔊</button>
+                </div>
+            </div>
+        </header>
+
+        <main class="game-main">
+            <div class="setup-phase" id="setup-phase">
+                <h2>Posicione seus navios</h2>
+                <div class="setup-content">
+                    <div class="ship-selector">
+                        <div class="ship-item" data-ship="carrier" draggable="true">
+                            <span class="ship-name">Porta-Aviões (5)</span>
+                            <div class="ship-visual" data-size="5"></div>
+                        </div>
+                        <div class="ship-item" data-ship="battleship" draggable="true">
+                            <span class="ship-name">Encouraçado (4)</span>
+                            <div class="ship-visual" data-size="4"></div>
+                        </div>
+                        <div class="ship-item" data-ship="cruiser" draggable="true">
+                            <span class="ship-name">Cruzador (3)</span>
+                            <div class="ship-visual" data-size="3"></div>
+                        </div>
+                        <div class="ship-item" data-ship="submarine" draggable="true">
+                            <span class="ship-name">Submarino (3)</span>
+                            <div class="ship-visual" data-size="3"></div>
+                        </div>
+                        <div class="ship-item" data-ship="destroyer" draggable="true">
+                            <span class="ship-name">Destróier (2)</span>
+                            <div class="ship-visual" data-size="2"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="setup-board">
+                        <h3>Seu Tabuleiro</h3>
+                        <div class="board" id="player-board"></div>
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <button id="rotate-btn">🔄 Rotacionar</button>
+                    <button id="start-game-btn" disabled>Iniciar Jogo</button>
+                </div>
+            </div>
+
+            <div class="game-phase" id="game-phase" style="display: none;">
+                <div class="boards-container">
+                    <div class="board-section">
+                        <h3>Seu Tabuleiro</h3>
+                        <div class="board" id="player-board"></div>
+                    </div>
+                    <div class="board-section">
+                        <h3>Tabuleiro do Oponente</h3>
+                        <div class="board" id="computer-board"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-over" id="game-over" style="display: none;">
+                <h2 id="winner-message"></h2>
+                <button id="restart-btn">Jogar Novamente</button>
+            </div>
+        </main>
+
+        <footer class="game-footer">
+            <div class="instructions">
+                <p>🎯 <strong>Como jogar:</strong> Posicione seus navios arrastando-os para o tabuleiro. Clique nas células do tabuleiro do oponente para atacar!</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
