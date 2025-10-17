@@ -638,7 +638,7 @@ class BattleshipGame {
                 cell.dataset.row = row;
                 cell.dataset.col = col;
                 
-                // Se há um navio nesta posição, mostrar
+                // Mostrar navios do jogador
                 if (this.playerBoard[row][col] && this.playerBoard[row][col] !== 0 && 
                     this.playerBoard[row][col] !== 'hit' && this.playerBoard[row][col] !== 'miss') {
                     cell.classList.add('ship');
@@ -647,6 +647,9 @@ class BattleshipGame {
                 playerBoardElement.appendChild(cell);
             }
         }
+        
+        // Atualizar visual do tabuleiro do jogador após criação
+        this.updatePlayerBoardVisual();
         
         // Criar elementos do tabuleiro do computador para a fase de jogo
         const computerBoardElement = document.getElementById('computer-board');
@@ -811,6 +814,9 @@ class BattleshipGame {
     computerMove() {
         if (this.gamePhase !== 'playing' || this.currentTurn !== 'computer') return;
         
+        // Mostrar que a IA está pensando
+        this.updateUI();
+        
         let row, col;
         let attempts = 0;
         
@@ -847,7 +853,7 @@ class BattleshipGame {
                         const newCol = hit.col + dc;
                         if (newRow >= 0 && newRow < this.boardSize && 
                             newCol >= 0 && newCol < this.boardSize &&
-                            this.playerBoard[newRow][newCol] === 0) {
+                            this.playerBoard[newRow][newCol] !== 'hit' && this.playerBoard[newRow][newCol] !== 'miss') {
                             adjacentCells.push({ row: newRow, col: newCol });
                         }
                     });
@@ -876,14 +882,14 @@ class BattleshipGame {
                 row = Math.floor(Math.random() * this.boardSize);
                 col = Math.floor(Math.random() * this.boardSize);
                 attempts++;
-            } while (this.playerBoard[row][col] !== 0 && attempts < 100);
+            } while ((this.playerBoard[row][col] === 'hit' || this.playerBoard[row][col] === 'miss') && attempts < 100);
         }
         
         if (attempts >= 100) {
             // Fallback: atacar a primeira célula disponível
             for (let r = 0; r < this.boardSize; r++) {
                 for (let c = 0; c < this.boardSize; c++) {
-                    if (this.playerBoard[r][c] === 0) {
+                    if (this.playerBoard[r][c] !== 'hit' && this.playerBoard[r][c] !== 'miss') {
                         row = r;
                         col = c;
                         break;
@@ -893,7 +899,10 @@ class BattleshipGame {
             }
         }
         
-        this.makePlayerMove(row, col);
+        // Delay para simular pensamento da IA
+        setTimeout(() => {
+            this.makePlayerMove(row, col);
+        }, 1500 + Math.random() * 1000); // Entre 1.5 e 2.5 segundos
     }
     
     findShipDirection(hitCells) {
@@ -961,10 +970,22 @@ class BattleshipGame {
         // Estratégia de grid: atacar em padrão de xadrez para maximizar chances
         const gridPattern = [];
         
+        // Padrão mais eficiente: atacar em grid 2x2
         for (let r = 0; r < this.boardSize; r += 2) {
-            for (let c = (r % 2); c < this.boardSize; c += 2) {
-                if (this.playerBoard[r][c] === 0) {
+            for (let c = 0; c < this.boardSize; c += 2) {
+                if (this.playerBoard[r][c] !== 'hit' && this.playerBoard[r][c] !== 'miss') {
                     gridPattern.push({ row: r, col: c });
+                }
+            }
+        }
+        
+        // Se não há mais células no padrão principal, usar padrão alternativo
+        if (gridPattern.length === 0) {
+            for (let r = 1; r < this.boardSize; r += 2) {
+                for (let c = 1; c < this.boardSize; c += 2) {
+                    if (this.playerBoard[r][c] !== 'hit' && this.playerBoard[r][c] !== 'miss') {
+                        gridPattern.push({ row: r, col: c });
+                    }
                 }
             }
         }
@@ -979,12 +1000,18 @@ class BattleshipGame {
     makePlayerMove(row, col) {
         const cell = document.querySelector(`#player-board .cell[data-row="${row}"][data-col="${col}"]`);
         
+        // Atualizar UI para mostrar que é a vez da IA
+        this.updateUI();
+        
         // Mostrar indicador de ataque da IA
         this.showIAAttackIndicator(row, col);
         
-        if (this.playerBoard[row][col] !== 0 && this.playerBoard[row][col] !== 'hit' && this.playerBoard[row][col] !== 'miss') {
+        // Verificar se há um navio nesta posição (tipo de navio, não hit/miss/0)
+        const cellValue = this.playerBoard[row][col];
+        if (cellValue && cellValue !== 0 && cellValue !== 'hit' && cellValue !== 'miss' && 
+            ['carrier', 'battleship', 'cruiser', 'submarine', 'destroyer'].includes(cellValue)) {
             // Acertou um navio
-            const shipType = this.playerBoard[row][col];
+            const shipType = cellValue;
             this.playerBoard[row][col] = 'hit';
             cell.classList.add('hit');
             cell.classList.remove('ship'); // Remover classe ship pois foi atingido
@@ -1018,7 +1045,7 @@ class BattleshipGame {
             this.currentTurn = 'computer';
             setTimeout(() => this.computerMove(), 1000);
         } else {
-            // Errou - mas só marca se ainda não foi atacado
+            // Errou - marca como miss se ainda não foi atacado
             if (this.playerBoard[row][col] === 0) {
                 this.playerBoard[row][col] = 'miss';
                 cell.classList.add('miss');
@@ -1190,6 +1217,10 @@ class BattleshipGame {
         } else if (this.currentTurn === 'player') {
             turnIndicator.textContent = 'Sua vez';
             turnIndicator.style.background = 'rgba(34, 197, 94, 0.8)';
+        } else if (this.currentTurn === 'computer') {
+            turnIndicator.textContent = 'IA pensando...';
+            turnIndicator.style.background = 'rgba(239, 68, 68, 0.8)';
+            turnIndicator.style.animation = 'pulse 1s infinite';
         } else {
             turnIndicator.textContent = 'Vez da IA';
             turnIndicator.style.background = 'rgba(239, 68, 68, 0.8)';
